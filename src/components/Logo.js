@@ -3,7 +3,7 @@ import { View, Text, Image, StyleSheet } from 'react-native';
 import { colors } from '../theme';
 
 export default function Logo({
-  size = 90,
+  size = 91,
   color = colors.navy,
   showText = true,
   light = false,
