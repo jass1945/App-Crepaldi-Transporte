@@ -2,35 +2,54 @@
 import React, { useState } from 'react';
 import {View,Text,TextInput,TouchableOpacity,StyleSheet,ScrollView,Alert} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { veiculos } from './src/data/veiculos';
+import { veiculos } from '../src/data/veiculos';
+import { adicionarViagem } from '../src/data/viagensStorage';
 
-export default function NvViagenScreen() {
+export default function NvViagenScreen({navigation}) {
   const [placa, setPlaca] = useState('');
   const [data, setData] = useState(new Date().toLocaleDateString('pt-BR'));
   const [hodometro, setHodometro] = useState('');
   const [numeroViagem, setNumeroViagem] = useState('');
   const [valor, setValor] = useState('');
+  const [Produtor, setProdutor] = useState('');
 
-  function salvarViagem() {
+  async function salvarViagem() {
     if (
       !placa.trim() ||
       !data.trim() ||
       !hodometro.trim() ||
       !numeroViagem.trim() ||
-      !valor.trim()
+      !valor.trim() ||
+      !Produtor.trim()
     ) {
       Alert.alert('Atenção', 'Preencha todos os campos.');
       return;
     }
 
-    Alert.alert('Sucesso', 'Viagem registrada!');
+    try {
+    await adicionarViagem({
+      placa,
+      data,
+      hodometro,
+      numeroViagem,
+      valor,
+      Produtor,
+    });
+
+    Alert.alert('Sucesso', 'Viagem registrada!',
+      [{text: 'ok', onPress:()=> navigation.goBack()}]
+    );
 
     setPlaca('');
     setData('');
     setHodometro('');
     setNumeroViagem('');
     setValor('');
+    setProdutor('');
+  }catch (erro) {
+    Alert.alert('Erro', 'Não foi possível salvar a viagem.');
   }
+}
 
   return (
     <ScrollView contentContainerStyle={styles.container}>      
@@ -89,6 +108,14 @@ export default function NvViagenScreen() {
         value={valor}
         onChangeText={setValor}
         keyboardType="decimal-pad"
+      />
+
+      <Text style={styles.label}>Nome do Produtor</Text>
+      <TextInput
+        style={styles.input}
+        value={Produtor}
+        onChangeText={setProdutor}
+        autoCapitalize="words"
       />
 
       <TouchableOpacity
