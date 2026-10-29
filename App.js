@@ -10,6 +10,8 @@ import HomeScreen from './screens/HomeScreen';
 import NvViagenScreen from './screens/NvViagenScreen';
 import ViagensScreen from './screens/ViagensScreen';
 import FaturamentoScreen from './screens/FaturamentoScreen';
+import CombustivelScreen from './screens/CombustivelScreen';
+import NvAbastecidaScreen from './screens/NvAbastecidaScreen';
 
 
 const Tab = createBottomTabNavigator();
@@ -60,6 +62,8 @@ function AppNavigator(){
                 iconName = 'bar-chart';
               } else if (route.name === 'Lançamento de Viagens') {
                 iconName = 'car-outline';
+              } else if (route.name === 'Abastecidas') {
+                iconName = 'water-outline';
               }
 
               return (
@@ -83,6 +87,11 @@ function AppNavigator(){
           />
 
           <Tab.Screen
+            name="Abastecidas"
+            component={CombustivelScreen}
+          />
+
+          <Tab.Screen
             name="Meu faturamento"
             component={FaturamentoScreen}
           />
@@ -96,6 +105,11 @@ function AppNavigator(){
             name="NovaViagem"
             component={NvViagenScreen}
             options={{ title: 'Nova viagem' }}/>
+
+        <Stack.Screen
+            name="NovaAbastecida"
+            component={NvAbastecidaScreen}
+            options={{ title: 'Nova abastecida' }}/>
       
       </Stack.Navigator>
     </NavigationContainer>
