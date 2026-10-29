@@ -12,6 +12,7 @@ import ViagensScreen from './screens/ViagensScreen';
 import FaturamentoScreen from './screens/FaturamentoScreen';
 import CombustivelScreen from './screens/CombustivelScreen';
 import NvAbastecidaScreen from './screens/NvAbastecidaScreen';
+import LoginScreen from './screens/LoginScreen';
 
 
 const Tab = createBottomTabNavigator();
@@ -30,7 +31,14 @@ function AppNavigator(){
   const insets = useSafeAreaInsets();
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator initialRouteName="Login">
+        <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{ headerShown: false }}
+        />
+
+
         <Stack.Screen
       name="Principal"
       options={{ headerShown: false }}>
