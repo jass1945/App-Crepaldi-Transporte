@@ -10,7 +10,6 @@ const larguraTela = Dimensions.get('window').width;
 
 function converterValor(valor) {
   const texto = String(valor ?? '')
-    .replace(/R\$/g, '')
     .replace(/\s/g, '');
 
   const normalizado = texto.includes(',')

@@ -11,7 +11,7 @@ export default function HomeScreen({ navigation }) {
         <Button
           title="Lançamento de viagens"
           color="#2563eb"
-          onPress={() => navigation.navigate('Lançamento de Viagens')}
+          onPress={() => navigation.navigate('Viagens')}
         />
       </View>
 
