@@ -68,7 +68,7 @@ function AppNavigator(){
                 iconName = 'home-outline';
               } else if (route.name === 'Meu faturamento') {
                 iconName = 'bar-chart';
-              } else if (route.name === 'Lançamento de Viagens') {
+              } else if (route.name === 'Viagens') {
                 iconName = 'car-outline';
               } else if (route.name === 'Abastecidas') {
                 iconName = 'water-outline';
@@ -90,7 +90,7 @@ function AppNavigator(){
           />
 
           <Tab.Screen
-            name="Lançamento de Viagens"
+            name="Viagens"
             component={ViagensScreen}
           />
 

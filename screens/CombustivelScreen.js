@@ -1,25 +1,12 @@
 import React, { useCallback, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-  Platform,
-} from 'react-native';
+import { View,  Text,  StyleSheet,  FlatList,  TouchableOpacity,  Alert,  Platform,} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import Motorista from '../components/motorista';
 import {
-  listarAbastecidas,
-  removerAbastecida,
-  formatarMoeda,
-  formatarNumero,
-} from '../src/data/abastecidasStorage';
+  listarAbastecidas,  removerAbastecida,  formatarMoeda,  formatarNumero,} from '../src/data/abastecidasStorage';
 
-// Média km/l de cada abastecida: km rodados desde a anterior da mesma placa / litros
 function calcularConsumo(abastecidas) {
   const consumo = {};
   const porPlaca = {};
