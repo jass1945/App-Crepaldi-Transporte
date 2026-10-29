@@ -1,11 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Button,
-  FlatList,
-} from 'react-native';
+import {View,Text,StyleSheet,Button,FlatList,} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
 import Motorista from '../components/motorista';
@@ -51,7 +45,7 @@ export default function ViagensScreen({ navigation }) {
       <Text style={styles.titulo}>Meus fretes</Text>
 
       <Button
-        title="NOVA VIAGEM"
+        title="+ NOVA VIAGEM"
         onPress={() => navigation.navigate('NovaViagem')}
         color="#2563eb"
       />
