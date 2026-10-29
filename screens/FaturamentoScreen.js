@@ -9,8 +9,7 @@ import Motorista from '../components/motorista';
 const larguraTela = Dimensions.get('window').width;
 
 function converterValor(valor) {
-  const texto = String(valor ?? '')
-    .replace(/\s/g, '');
+  const texto = String(valor ?? '').replace(/\s/g, '');
 
   const normalizado = texto.includes(',')
     ? texto.replace(/\./g, '').replace(',', '.')
@@ -18,7 +17,9 @@ function converterValor(valor) {
 
   const numero = Number(normalizado);
 
-  return Number.isFinite(numero) ? numero : 0;
+  return Number.isFinite(numero)
+    ? Math.round(numero * 100) / 100
+    : 0;
 }
 
 
@@ -41,24 +42,14 @@ export default function FaturamentoScreen() {
   );
 
   
-  const faturamentoPorPlaca = viagens.reduce((acumulado, viagem) => {
-    const placa = viagem.placa || 'Sem placa';
-    const valorTexto = String(viagem.valor ?? '')
-      .replace(/R\$/g, '')
-      .replace(/\s/g, '');
+const faturamentoPorPlaca = viagens.reduce((acumulado, viagem) => {
+  const placa = viagem.placa || 'Sem placa';
+  const valor = converterValor(viagem.valor);
 
-    const valor = Number(
-      valorTexto.includes(',')
-        ? valorTexto.replace(/\./g, '').replace(',', '.')
-        : valorTexto
-    );
+  acumulado[placa] = (acumulado[placa] || 0) + valor;
 
-    acumulado[placa] =
-      (acumulado[placa] || 0) +
-      (Number.isFinite(valor) ? valor : 0);
-
-    return acumulado;
-  }, {});
+  return acumulado;
+}, {});
 
   const placas = Object.keys(faturamentoPorPlaca);
 
@@ -88,6 +79,8 @@ export default function FaturamentoScreen() {
           {faturamentoTotal.toLocaleString('pt-BR', {
             style: 'currency',
             currency: 'BRL',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
           })}
         </Text>
       </View>
@@ -103,6 +96,11 @@ export default function FaturamentoScreen() {
             width={Math.max(larguraTela - 48, placas.length * 90)}
             height={300}
             yAxisLabel="R$ "
+            formatYLabel={(valor) =>
+              Number(valor).toLocaleString('pt-BR', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2,
+              })}           
             fromZero
             showValuesOnTopOfBars
             chartConfig={{

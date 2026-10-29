@@ -4,6 +4,8 @@ import { useFocusEffect } from '@react-navigation/native';
 
 import Motorista from '../components/motorista';
 import { listarViagens } from '../src/data/viagensStorage';
+import CardViagem from '../components/card';
+
 
 export default function ViagensScreen({ navigation }) {
   const [viagens, setViagens] = useState([]);
@@ -23,20 +25,9 @@ export default function ViagensScreen({ navigation }) {
     }, [])
   );
 
-  function renderizarViagem({ item }) {
-    return (
-      <View style={styles.card}>
-        <Text style={styles.cardTitulo}>
-          Viagem {item.numeroViagem}
-        </Text>
-
-        <Text>Placa: {item.placa}</Text>
-        <Text>Data: {item.data}</Text>
-        <Text>Valor: R$ {item.valor}</Text>
-        <Text>Produtor: {item.Produtor}</Text>
-      </View>
-    );
-  }
+function renderizarViagem({ item }) {
+  return <CardViagem viagem={item} />;
+}
 
   return (
     <View style={styles.container}>
@@ -45,7 +36,7 @@ export default function ViagensScreen({ navigation }) {
       <Text style={styles.titulo}>Meus fretes</Text>
 
       <Button
-        title="+ NOVA VIAGEM"
+        title="NOVA VIAGEM"
         onPress={() => navigation.navigate('NovaViagem')}
         color="#2563eb"
       />
@@ -70,6 +61,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     backgroundColor: '#f4f6f9',
+    
   },
   titulo: {
     fontSize: 26,
@@ -86,18 +78,5 @@ const styles = StyleSheet.create({
     marginTop: 16,
     textAlign: 'center',
   },
-  card: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 10,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-  },
-  cardTitulo: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1e3a8a',
-    marginBottom: 8,
-  },
+ 
 });
