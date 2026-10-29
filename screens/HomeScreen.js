@@ -1,21 +1,34 @@
-import { View, Text, StyleSheet } from 'react-native';
+
+import { View, Text, Button, StyleSheet } from 'react-native';
 import Motorista from '../components/motorista';
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
-      <Motorista/>
+      <Motorista />
 
-      <View style={styles.card}>
-        <Text>Lançamento de viagens</Text>       
+      <View style={styles.botao}>
+        <Button
+          title="Lançamento de viagens"
+          color="#2563eb"
+          onPress={() => navigation.navigate('Lançamento de Viagens')}
+        />
       </View>
 
-      <View style={styles.card}>
-        <Text>Lançamento de Abastecidas</Text>       
+      <View style={styles.botao}>
+        <Button
+          title="Lançamento de Abastecidas"
+          color="#2563eb"
+          onPress={() => navigation.navigate('Abastecidas')}
+        />
       </View>
 
-      <View style={styles.card}>
-        <Text>Meu Faturamento</Text>
+      <View style={styles.botao}>
+        <Button
+          title="Meu Faturamento"
+          color="#2563eb"
+          onPress={() => navigation.navigate('Meu faturamento')}
+        />
       </View>
     </View>
   );
@@ -27,21 +40,11 @@ const styles = StyleSheet.create({
     padding: 24,
     backgroundColor: '#f4f6f9',
   },
-  titulo: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  card: {
-    backgroundColor: '#fff',
-    padding: 20,
+  botao: {
     marginTop: 20,
-    borderRadius: 12,
-  },
-  numero: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: '#2563eb',
-    marginTop: 8,
+    borderRadius: 10,    
+    overflow: 'hidden',
+    
+    
   },
 });
