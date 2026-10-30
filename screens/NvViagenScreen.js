@@ -1,17 +1,30 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import {View,Text,TextInput,TouchableOpacity,StyleSheet,ScrollView,Alert} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { veiculos } from '../src/data/veiculos';
-import { adicionarViagem } from '../src/data/viagensStorage';
+import { adicionarViagem, atualizarViagem } from '../src/data/viagensStorage';
 
-export default function NvViagenScreen({navigation}) {
+export default function NvViagenScreen({navigation, route }) {
   const [placa, setPlaca] = useState('');
   const [data, setData] = useState(new Date().toLocaleDateString('pt-BR'));
   const [hodometro, setHodometro] = useState('');
   const [numeroViagem, setNumeroViagem] = useState('');
   const [valor, setValor] = useState('');
   const [Produtor, setProdutor] = useState('');
+
+  const viagem = route?.params?.viagem;
+
+useEffect(() => {
+  if (viagem) {
+    setPlaca(viagem.placa ?? '');
+    setData(viagem.data ?? '');
+    setHodometro(String(viagem.hodometro ?? ''));
+    setNumeroViagem(String(viagem.numeroViagem ?? ''));
+    setValor(String(viagem.valor ?? ''));
+    setProdutor(viagem.Produtor ?? '');
+  }
+}, [viagem]);
 
   async function salvarViagem() {
     if (
@@ -27,25 +40,32 @@ export default function NvViagenScreen({navigation}) {
     }
 
     try {
-    await adicionarViagem({
+    const dadosViagem ={
       placa,
       data,
       hodometro,
       numeroViagem,
       valor,
       Produtor,
-    });
+    };
+    if (viagem) {
+      await atualizarViagem({
+        ...dadosViagem,
+        id: viagem.id,
+      });
+
+    Alert.alert(
+      'Sucesso',
+      'Viagem atualizada!',
+      [{ text: 'OK', onPress: () => navigation.goBack() }]
+    );
+    } else {
+      await adicionarViagem(dadosViagem);      
 
     Alert.alert('Sucesso', 'Viagem registrada!',
       [{text: 'ok', onPress:()=> navigation.goBack()}]
-    );
-
-    setPlaca('');
-    setData('');
-    setHodometro('');
-    setNumeroViagem('');
-    setValor('');
-    setProdutor('');
+    );}
+    
   }catch (erro) {
     Alert.alert('Erro', 'Não foi possível salvar a viagem.');
   }
@@ -122,7 +142,7 @@ export default function NvViagenScreen({navigation}) {
         style={styles.botao}
         onPress={salvarViagem}
       >
-        <Text style={styles.textoBotao}>SALVAR VIAGEM</Text>
+        <Text style={styles.textoBotao}>{viagem ? 'SALVAR ALTERAÇÕES' : 'SALVAR VIAGEM'}</Text>
       </TouchableOpacity>
     </ScrollView>
   );

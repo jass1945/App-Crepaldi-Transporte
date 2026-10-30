@@ -23,3 +23,18 @@ export async function adicionarViagem(viagem) {
 
   return novasViagens;
 }
+
+export async function atualizarViagem(viagemAtualizada) {
+  const viagens = await listarViagens();
+
+  const novasViagens = viagens.map((viagem) =>
+    viagem.id === viagemAtualizada.id
+      ? viagemAtualizada
+      : viagem
+  );
+
+  await AsyncStorage.setItem(
+    '@crepaldi:viagens',
+    JSON.stringify(novasViagens)
+  );
+}
