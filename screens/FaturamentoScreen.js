@@ -1,3 +1,6 @@
+function formatarReais(valor) {
+  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
 
 import React, { useCallback, useState } from 'react';
 import {View,Text,StyleSheet,ScrollView,Dimensions,} from 'react-native';
@@ -7,6 +10,8 @@ import { listarViagens } from '../src/data/viagensStorage';
 import Motorista from '../components/motorista';
 
 const larguraTela = Dimensions.get('window').width;
+
+const META_FATURAMENTO = 25000;
 
 function converterValor(valor) {
   const texto = String(valor ?? '').replace(/\s/g, '');
@@ -42,7 +47,7 @@ export default function FaturamentoScreen() {
   );
 
   
-const faturamentoPorPlaca = viagens.reduce((acumulado, viagem) => {
+  const faturamentoPorPlaca = viagens.reduce((acumulado, viagem) => {
   const placa = viagem.placa || 'Sem placa';
   const valor = converterValor(viagem.valor);
 
@@ -54,7 +59,13 @@ const faturamentoPorPlaca = viagens.reduce((acumulado, viagem) => {
   const placas = Object.keys(faturamentoPorPlaca);
 
   const faturamentoTotal = Object.values(faturamentoPorPlaca)
+  
     .reduce((total, valor) => total + valor, 0);
+
+  const porcentagem = (faturamentoTotal / META_FATURAMENTO) * 100;
+  const falta = META_FATURAMENTO - faturamentoTotal;
+  const metaBatida = faturamentoTotal >= META_FATURAMENTO;
+  const larguraBarra = Math.min(porcentagem, 100);
 
   const dadosGrafico = {
     labels: placas,
@@ -74,16 +85,21 @@ const faturamentoPorPlaca = viagens.reduce((acumulado, viagem) => {
         <Text style={styles.rotulo}>
           Faturamento total
         </Text>
+        <Text style={styles.rotulo}>Meta: {formatarReais(META_FATURAMENTO)}</Text>
 
         <Text style={styles.valorTotal}>
-          {faturamentoTotal.toLocaleString('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}
+          {formatarReais(faturamentoTotal)}
         </Text>
       </View>
+
+      <View style={styles.barraFundo}>
+      <View style={[styles.barraPreenchida, { width: `${larguraBarra}%` }]} />
+      </View>
+      <Text style={styles.textoMeta}>
+      {metaBatida
+      ? 'Meta batida!'
+      : `${porcentagem.toFixed(0)}% da meta — faltam ${formatarReais(falta)}`}
+      </Text>
 
       <Text style={styles.subtitulo}>
         Faturamento por placa
@@ -97,7 +113,7 @@ const faturamentoPorPlaca = viagens.reduce((acumulado, viagem) => {
             height={300}
             yAxisLabel="R$ "
             formatYLabel={(valor) =>
-              Number(valor).toLocaleString('pt-BR', {
+              Number(valor).formatarReais(faturamentoTotal)('pt-BR', {
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 2,
               })}           
@@ -167,6 +183,18 @@ const styles = StyleSheet.create({
   },
   grafico: {
     borderRadius: 12,
+  },
+  barraFundo: {
+  height: 14,
+  backgroundColor: '#e2e8f0',
+  borderRadius: 7,
+  overflow: 'hidden',
+  marginTop: 16,
+  },
+  barraPreenchida: {
+  height: '100%',
+  backgroundColor: '#2563eb',
+  borderRadius: 7,
   },
   vazio: {
     color: '#64748b',
