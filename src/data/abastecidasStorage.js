@@ -60,3 +60,12 @@ export function formatarNumero(valor, casas = 2) {
     maximumFractionDigits: casas,
   });
 }
+
+export async function buscarUltimaAbastecida(placa) {
+const lista = await listarAbastecidas();
+const doVeiculo = lista.filter(
+  (a) => a.placa === placa && a.combustivel !== 'Arla 32'
+  );
+if (doVeiculo.length === 0) return null;
+  return doVeiculo.reduce((maior, a) => (a.hodometro > maior.hodometro ? a : maior));
+}
