@@ -4,8 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import Motorista from '../components/motorista';
-import {
-  listarAbastecidas,  removerAbastecida,  formatarMoeda,  formatarNumero,} from '../src/data/abastecidasStorage';
+import { listarAbastecidas,  removerAbastecida,  formatarMoeda,  formatarNumero,} from '../src/data/abastecidasStorage';
 
 function calcularConsumo(abastecidas) {
   const consumo = {};
@@ -96,7 +95,7 @@ export default function CombustivelScreen({ navigation }) {
           <Text style={styles.tag}>
             {formatarMoeda(item.precoLitro)}/L
           </Text>
-          {item.tanqueCheio && <Text style={styles.tag}>Tanque cheio</Text>}
+          
         </View>
 
         <View style={styles.cardRodape}>

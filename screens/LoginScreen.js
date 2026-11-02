@@ -1,14 +1,6 @@
 
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  Image,
-} from 'react-native';
+import {  View,  Text,  TextInput,  TouchableOpacity,  StyleSheet,  Alert,  Image,} from 'react-native';
 
 import { validarLogin } from '../src/data/motoristaLogin';
 
@@ -39,9 +31,7 @@ export default function LoginScreen({ navigation }) {
       />
 
       <Text style={styles.titulo}>Bem-vindo!</Text>
-      <Text style={styles.subtitulo}>
-        Entre com seu CPF e sua senha.
-      </Text>
+     
 
       <Text style={styles.label}>CPF</Text>
       <TextInput
@@ -70,7 +60,7 @@ export default function LoginScreen({ navigation }) {
       </TouchableOpacity>
 
       <Text style={styles.rodape}>
-        Acesso exclusivo para motoristas.
+        Acesso exclusivo para motoristas previamente cadastrados.
       </Text>
     </View>
   );
@@ -80,7 +70,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f4f6f9',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 85,
     padding: 28,
   },
   logo: {
@@ -88,6 +79,7 @@ const styles = StyleSheet.create({
     height: 120,
     alignSelf: 'center',
     marginBottom: 30,
+    marginTop: 2,
   },
   titulo: {
     fontSize: 28,
