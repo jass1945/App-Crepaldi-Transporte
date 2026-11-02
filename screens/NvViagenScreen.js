@@ -37,8 +37,11 @@ useEffect(() => {
       !numeroViagem.trim() ||
       !valor.trim() ||
       !Produtor.trim()
-    ) {
-      Alert.alert('Atenção', 'Preencha todos os campos.');
+    ) {Alert.alert('Atenção', 'Preencha todos os campos.');
+      return;
+    }
+    if (numeroViagem.length !== 8) {
+      Alert.alert('Atenção','O número do lançamento deve conter exatamente 8 dígitos.');
       return;
     }
 
@@ -141,6 +144,7 @@ useEffect(() => {
           value={numeroViagem}
           onChangeText={setNumeroViagem}
           keyboardType="numeric"
+          maxLength={8}
         />
 
         <Text style={styles.label}>Valor da viagem (R$)</Text>
