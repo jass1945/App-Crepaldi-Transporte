@@ -5,22 +5,30 @@ import { Ionicons } from '@expo/vector-icons';
 
 export default function CardViagem({ viagem, onEditar }) {
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, viagem.cancelada && styles.cardCancelado]}>
       <Text style={styles.cardTitulo}>
         Viagem {viagem.numeroViagem}
       </Text>
+      {viagem.cancelada && (
+        <Text style={styles.avisoCancelado}>CANCELADA</Text>
+      )}
 
       <Text>Placa: {viagem.placa}</Text>
       <Text>Data: {viagem.data}</Text>
       <Text>Valor: R$ {viagem.valor}</Text>
       <Text>Produtor: {viagem.Produtor}</Text>
 
+    
+
+    {!viagem.cancelada && (
       <TouchableOpacity
-      style={styles.botaoEditar}
-      onPress={onEditar}>
+        style={styles.botaoEditar}
+        onPress={onEditar}
+      >
         <Ionicons name="create-outline" size={18} color="#fff" />
         <Text style={styles.textoBotao}>Editar</Text>
       </TouchableOpacity>
+    )}
 
     </View>
   );
@@ -57,5 +65,15 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 12,
+  },
+  cardCancelado: {
+    borderColor: '#dc2626',
+    borderWidth: 2,
+    backgroundColor: '#fef2f2',
+  },
+  avisoCancelado: {
+    color: '#dc2626',
+    fontWeight: 'bold',
+    marginBottom: 8,    
   },
 });

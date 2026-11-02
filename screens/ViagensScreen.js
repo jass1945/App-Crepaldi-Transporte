@@ -26,7 +26,7 @@ export default function ViagensScreen({ navigation }) {
   );
 
 function renderizarViagem({ item }) {
-  return <CardViagem viagem={item} />;
+  return <CardViagem viagem={item} onEditar={()=> navigation.navigate('NovaViagem', {viagem:item,})}/>;
 }
 
   return (
