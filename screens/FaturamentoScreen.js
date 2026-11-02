@@ -36,7 +36,9 @@ export default function FaturamentoScreen() {
       async function carregarViagens() {
         try {
           const dados = await listarViagens();
-          setViagens(dados);
+          const viagensValidas = dados.filter(
+            (viagem) => !viagem.cancelada);
+          setViagens(viagensValidas);
         } catch (erro) {
           console.error('Erro ao carregar faturamento:', erro);
         }

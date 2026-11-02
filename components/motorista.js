@@ -47,17 +47,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
     marginTop: 6,
     marginBottom: 8,
-    padding: 20,
+    padding: 15,
     borderRadius: 18,
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
+    marginTop: 20, 
   },
 
   info: {
-    marginBottom: 20,
+    marginBottom: 5,
   },
 
   detalhe: {

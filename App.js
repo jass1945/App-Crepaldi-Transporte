@@ -46,13 +46,7 @@ function AppNavigator(){
         <Tab.Navigator
           initialRouteName="Início"
           screenOptions={({ route }) => ({
-            headerStyle: {
-              backgroundColor: '#2563eb',
-            },
-            headerTintColor: '#fff',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
+            headerShown: false,
             tabBarActiveTintColor: '#2563eb',
             tabBarInactiveTintColor: '#777',
             tabBarStyle: {

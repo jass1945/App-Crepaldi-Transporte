@@ -1,11 +1,33 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+
 export default function CardViagem({ viagem, onEditar }) {
+  const [tempoDisponivel, setTempoDisponivel] = useState(false);
+
+  useEffect(() => {
+    function verificarTempo() {
+      if (!viagem.criadoEm) {
+        setTempoDisponivel(false);
+        return;
+      }
+
+      const tempoDecorrido = Date.now() - viagem.criadoEm;
+
+      setTempoDisponivel(tempoDecorrido < 30000);
+    }
+    verificarTempo();
+
+    const intervalo = setInterval(verificarTempo, 1000);
+
+    return () => clearInterval(intervalo);
+  }, [viagem.criadoEm]);  
+
+
   return (
-    <View style={[styles.card, viagem.cancelada && styles.cardCancelado]}>
+    <View style={[styles.card, viagem.cancelada]}>
       <Text style={styles.cardTitulo}>
         Viagem {viagem.numeroViagem}
       </Text>
@@ -16,11 +38,9 @@ export default function CardViagem({ viagem, onEditar }) {
       <Text>Placa: {viagem.placa}</Text>
       <Text>Data: {viagem.data}</Text>
       <Text>Valor: R$ {viagem.valor}</Text>
-      <Text>Produtor: {viagem.Produtor}</Text>
+      <Text>Produtor: {viagem.Produtor}</Text>    
 
-    
-
-    {!viagem.cancelada && (
+    {!viagem.cancelada && tempoDisponivel && (
       <TouchableOpacity
         style={styles.botaoEditar}
         onPress={onEditar}
@@ -39,7 +59,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 16,
     borderRadius: 10,
-    marginBottom: 12,
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
@@ -47,7 +67,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#1e3a8a',
-    marginBottom: 8,
+    marginBottom: 5,
   },
   botaoEditar: {
     backgroundColor: '#2563eb',
@@ -65,15 +85,15 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 12,
-  },
-  cardCancelado: {
-    borderColor: '#dc2626',
-    borderWidth: 2,
-    backgroundColor: '#fef2f2',
-  },
+  }, 
   avisoCancelado: {
     color: '#dc2626',
     fontWeight: 'bold',
-    marginBottom: 8,    
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-end',    
+    paddingVertical: 6,
+    paddingHorizontal: 8,    
+    marginTop: -30,      
   },
 });

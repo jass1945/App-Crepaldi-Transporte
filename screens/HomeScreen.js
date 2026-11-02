@@ -6,6 +6,7 @@ export default function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Motorista />
+      <Text style={styles.titulo}>HOME</Text>
 
       <View style={styles.botao}>
         <Button

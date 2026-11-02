@@ -12,7 +12,7 @@ export async function adicionarViagem(viagem) {
   const viagens = await listarViagens();
 
   const novasViagens = [
-    { ...viagem, id: String(Date.now()) },
+    { ...viagem, id: String(Date.now()), criadoEm: Date.now(), },    
     ...viagens,
   ];
 
