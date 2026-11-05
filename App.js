@@ -13,6 +13,7 @@ import FaturamentoScreen from './screens/FaturamentoScreen';
 import CombustivelScreen from './screens/CombustivelScreen';
 import NvAbastecidaScreen from './screens/NvAbastecidaScreen';
 import LoginScreen from './screens/LoginScreen';
+import { supabase } from './src/services/supabase';
 
 
 const Tab = createBottomTabNavigator();
