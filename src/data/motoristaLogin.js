@@ -1,25 +1,42 @@
+import { supabase } from '../services/supabase';
 
-const motoristas = [
-  {
-    nome: 'Fulano da Silva',
-    cpf: '12345678900',
-    senha: '1234',
-  },
-  {
-    nome: 'Siclano da Silva',
-    cpf: '14725836900',
-    senha: '1234',
-  },
-];
+export async function validarLogin(cpf, senha) {
+  const cpfLimpo = String(cpf).replace(/\D/g, '');
+  const senhaTexto = String(senha);
 
-export function validarLogin(cpf, senha) {
-  const cpfLimpo = cpf.replace(/\D/g, '');
+  if (cpfLimpo.length !== 11 || !/^\d{4}$/.test(senhaTexto)) {
+    return {
+      sucesso: false,
+      mensagem: 'Informe um CPF válido e uma senha de 4 dígitos.',
+    };
+  }
 
-  const motorista = motoristas.find(
-    (item) =>
-      item.cpf === cpfLimpo &&
-      item.senha === senha
+  const { data, error } = await supabase.rpc(
+    'validar_login_motorista',
+    {
+      p_cpf: cpfLimpo,
+      p_senha: senhaTexto,
+    }
   );
 
-  return Boolean(motorista);
+  if (error) {
+    console.log('Erro ao validar login:', error.message);
+
+    return {
+      sucesso: false,
+      mensagem: 'Não foi possível realizar o login.',
+    };
+  }
+
+  if (!data || data.length === 0) {
+    return {
+      sucesso: false,
+      mensagem: 'CPF ou senha incorretos.',
+    };
+  }
+
+  return {
+    sucesso: true,
+    motorista: data[0],
+  };
 }

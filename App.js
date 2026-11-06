@@ -6,6 +6,8 @@ import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-cont
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 
+
+
 import HomeScreen from './screens/HomeScreen';
 import NvViagenScreen from './screens/NvViagenScreen';
 import ViagensScreen from './screens/ViagensScreen';
@@ -21,11 +23,13 @@ const Stack = createNativeStackNavigator();
 
 
 export default function App() {
+ 
   return(
     <SafeAreaProvider>
       <AppNavigator />
     </SafeAreaProvider>
   );
+
 }
 
 function AppNavigator(){

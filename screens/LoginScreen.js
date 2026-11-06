@@ -8,18 +8,27 @@ export default function LoginScreen({ navigation }) {
   const [cpf, setCpf] = useState('');
   const [senha, setSenha] = useState('');
 
-  function entrar() {
+  async function entrar() {
     if (!cpf || !senha) {
       Alert.alert('Atenção', 'Preencha o CPF e a senha.');
       return;
     }
 
-    if (!validarLogin(cpf, senha)) {
-      Alert.alert('Erro', 'CPF ou senha incorretos.');
+    if (senha.length !== 4) {
+      Alert.alert('Atenção', 'A senha deve ter 4 dígitos.');
       return;
     }
 
-    navigation.replace('Principal');
+    const resultado = await validarLogin(cpf, senha);
+
+    if (!resultado.sucesso) {
+      Alert.alert('Erro', resultado.mensagem);
+      return;
+    }
+
+    navigation.replace('Principal', {
+      motorista: resultado.motorista,
+    });
   }
 
   return (
@@ -31,7 +40,6 @@ export default function LoginScreen({ navigation }) {
       />
 
       <Text style={styles.titulo}>Bem-vindo!</Text>
-     
 
       <Text style={styles.label}>CPF</Text>
       <TextInput
@@ -50,8 +58,12 @@ export default function LoginScreen({ navigation }) {
         style={styles.input}
         placeholder="Digite sua senha"
         value={senha}
-        onChangeText={setSenha}
+        onChangeText={(texto) =>
+          setSenha(texto.replace(/\D/g, '').slice(0, 4))
+        }
+        keyboardType="numeric"
         secureTextEntry
+        maxLength={4}
         onSubmitEditing={entrar}
       />
 
