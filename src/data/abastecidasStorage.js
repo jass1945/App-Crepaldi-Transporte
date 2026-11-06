@@ -1,39 +1,36 @@
+import { supabase } from './supabase';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const CHAVE_ABASTECIDAS = '@crepaldi:abastecidas';
-
+// Busca todas as abastecidas no banco, da mais nova para a mais antiga
 export async function listarAbastecidas() {
-  const dados = await AsyncStorage.getItem(CHAVE_ABASTECIDAS);
-  return dados ? JSON.parse(dados) : [];
+  const { data, error } = await supabase
+    .from('abastecidas')
+    .select('*')
+    .order('id', { ascending: false });
+
+  if (error) throw error;
+  return data ?? [];
 }
 
+// Insere UMA abastecida nova no banco (o id é gerado pelo próprio banco)
 export async function adicionarAbastecida(abastecida) {
-  const abastecidas = await listarAbastecidas();
+  const { data, error } = await supabase
+    .from('abastecidas')
+    .insert(abastecida)
+    .select()
+    .single();
 
-  const novasAbastecidas = [
-    { ...abastecida, id: String(Date.now()) },
-    ...abastecidas,
-  ];
-
-  await AsyncStorage.setItem(
-    CHAVE_ABASTECIDAS,
-    JSON.stringify(novasAbastecidas)
-  );
-
-  return novasAbastecidas;
+  if (error) throw error;
+  return data;
 }
 
+// Apaga a abastecida com o id informado
 export async function removerAbastecida(id) {
-  const abastecidas = await listarAbastecidas();
-  const novasAbastecidas = abastecidas.filter((item) => item.id !== id);
+  const { error } = await supabase
+    .from('abastecidas')
+    .delete()
+    .eq('id', id);
 
-  await AsyncStorage.setItem(
-    CHAVE_ABASTECIDAS,
-    JSON.stringify(novasAbastecidas)
-  );
-
-  return novasAbastecidas;
+  if (error) throw error;
 }
 
 // Aceita "1.234,56", "1234,56" ou "1234.56"
@@ -62,10 +59,10 @@ export function formatarNumero(valor, casas = 2) {
 }
 
 export async function buscarUltimaAbastecida(placa) {
-const lista = await listarAbastecidas();
-const doVeiculo = lista.filter(
-  (a) => a.placa === placa && a.combustivel !== 'Arla 32'
+  const lista = await listarAbastecidas();
+  const doVeiculo = lista.filter(
+    (a) => a.placa === placa && a.combustivel !== 'Arla 32'
   );
-if (doVeiculo.length === 0) return null;
+  if (doVeiculo.length === 0) return null;
   return doVeiculo.reduce((maior, a) => (a.hodometro > maior.hodometro ? a : maior));
 }
