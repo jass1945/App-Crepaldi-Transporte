@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase } from "../services/supabase";
 
 // Busca todas as abastecidas no banco, da mais nova para a mais antiga
 export async function listarAbastecidas() {
