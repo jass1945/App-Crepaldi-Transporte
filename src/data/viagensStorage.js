@@ -1,40 +1,86 @@
+import { supabase } from '../services/supabase';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+function dataParaBanco(texto) {
+  const [d, m, a] = String(texto).split('/');
+  return `${a}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+}
 
-const CHAVE_VIAGENS = '@crepaldi:viagens';
+function dataParaApp(iso) {
+  const [a, m, d] = String(iso).split('-');
+  return `${d}/${m}/${a}`;
+}
+
+function paraNumero(valor) {
+  const texto = String(valor ?? '').replace(/\s/g, '');
+  const normalizado = texto.includes(',')
+    ? texto.replace(/\./g, '').replace(',', '.')
+    : texto;
+  const n = Number(normalizado);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function doBanco(linha) {
+  return {
+    id: String(linha.id),
+    placa: linha.placa_do_veiculo,
+    data: dataParaApp(linha.data_da_viagem),
+    hodometro: linha.hodometro,
+    numeroViagem: linha.numero_viagem,
+    valor: linha.valor_da_viagem,
+    Produtor: linha.nome_do_produtor,
+    cancelada: linha.cancelada,
+    hodometroCancelamento: linha.hodometro_cancelamento,
+    motivoCancelamento: linha.motivo_cancelamento,
+  };
+}
+
+function paraBanco(v) {
+  const linha = {
+    placa_do_veiculo: v.placa,
+    data_da_viagem: dataParaBanco(v.data),
+    hodometro: paraNumero(v.hodometro),
+    numero_viagem: String(v.numeroViagem),
+    valor_da_viagem: paraNumero(v.valor),
+    nome_do_produtor: v.Produtor,
+    cancelada: !!v.cancelada,
+  };
+  if (v.cancelada) {
+    linha.hodometro_cancelamento = paraNumero(v.hodometroCancelamento);
+    linha.motivo_cancelamento = v.motivoCancelamento ?? null;
+  }
+  return linha;
+}
 
 export async function listarViagens() {
-  const dados = await AsyncStorage.getItem(CHAVE_VIAGENS);
-  return dados ? JSON.parse(dados) : [];
+  const { data, error } = await supabase
+    .from('nova_viagem')
+    .select('*')
+    .order('data_da_viagem', { ascending: false })
+    .order('id', { ascending: false });
+
+  if (error) throw error;
+  return data.map(doBanco);
 }
 
 export async function adicionarViagem(viagem) {
-  const viagens = await listarViagens();
+  const { data, error } = await supabase
+    .from('nova_viagem')
+    .insert(paraBanco(viagem))
+    .select()
+    .single();
 
-  const novasViagens = [
-    { ...viagem, id: String(Date.now()), criadoEm: Date.now(), },    
-    ...viagens,
-  ];
-
-  await AsyncStorage.setItem(
-    CHAVE_VIAGENS,
-    JSON.stringify(novasViagens)
-  );
-
-  return novasViagens;
+  if (error) throw error;
+  return doBanco(data);
 }
 
-export async function atualizarViagem(viagemAtualizada) {
-  const viagens = await listarViagens();
+export async function atualizarViagem(viagem) {
+  const { data, error } = await supabase
+    .from('nova_viagem')
+    .update(paraBanco(viagem))
+    .eq('id', viagem.id)
+    .select()
+    .single();
 
-  const novasViagens = viagens.map((viagem) =>
-    viagem.id === viagemAtualizada.id
-      ? viagemAtualizada
-      : viagem
-  );
-
-  await AsyncStorage.setItem(
-    '@crepaldi:viagens',
-    JSON.stringify(novasViagens)
-  );
+  if (error) throw error;
+  return doBanco(data);
 }
