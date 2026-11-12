@@ -1,4 +1,14 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../services/supabase';
+import { obterMotorista } from './sessao';
+
+const chaveLocal = (motoristaId) => `@crepaldi:viagens:${motoristaId}`;
+
+let sincronizando = null;
+
+function gerarIdLocal() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
 
 function dataParaBanco(texto) {
   const [d, m, a] = String(texto).split('/');
@@ -6,6 +16,7 @@ function dataParaBanco(texto) {
 }
 
 function dataParaApp(iso) {
+  if (!iso) return '';
   const [a, m, d] = String(iso).split('-');
   return `${d}/${m}/${a}`;
 }
@@ -19,23 +30,31 @@ function paraNumero(valor) {
   return Number.isFinite(n) ? n : 0;
 }
 
-function doBanco(linha) {
+function ordenar(lista) {
+  return [...lista].sort((x, y) => (y.criadoEm ?? 0) - (x.criadoEm ?? 0));
+}
+
+function doBanco(l) {
   return {
-    id: String(linha.id),
-    placa: linha.placa_do_veiculo,
-    data: dataParaApp(linha.data_da_viagem),
-    hodometro: linha.hodometro,
-    numeroViagem: linha.numero_viagem,
-    valor: linha.valor_da_viagem,
-    Produtor: linha.nome_do_produtor,
-    cancelada: linha.cancelada,
-    hodometroCancelamento: linha.hodometro_cancelamento,
-    motivoCancelamento: linha.motivo_cancelamento,
+    id: l.id_local ?? `srv-${l.id}`,
+    placa: l.placa_do_veiculo,
+    data: dataParaApp(l.data_da_viagem),
+    hodometro: l.hodometro,
+    numeroViagem: l.numero_viagem,
+    valor: l.valor_da_viagem,
+    Produtor: l.nome_do_produtor,
+    cancelada: l.cancelada,
+    hodometroCancelamento: l.hodometro_cancelamento,
+    motivoCancelamento: l.motivo_cancelamento,
+    sincronizada: true,
+    criadoEm: new Date(l.created_at).getTime(),
   };
 }
 
-function paraBanco(v) {
-  const linha = {
+function paraBanco(v, motoristaId) {
+  return {
+    id_local: v.id,
+    motorista_id: motoristaId,
     placa_do_veiculo: v.placa,
     data_da_viagem: dataParaBanco(v.data),
     hodometro: paraNumero(v.hodometro),
@@ -43,44 +62,152 @@ function paraBanco(v) {
     valor_da_viagem: paraNumero(v.valor),
     nome_do_produtor: v.Produtor,
     cancelada: !!v.cancelada,
+    hodometro_cancelamento: v.cancelada
+      ? paraNumero(v.hodometroCancelamento)
+      : null,
+    motivo_cancelamento: v.cancelada ? v.motivoCancelamento ?? null : null,
   };
-  if (v.cancelada) {
-    linha.hodometro_cancelamento = paraNumero(v.hodometroCancelamento);
-    linha.motivo_cancelamento = v.motivoCancelamento ?? null;
+}
+function comTimeout(promessa, ms = 5000) {
+  return Promise.race([
+    promessa,
+    new Promise((_, rejeitar) =>
+      setTimeout(() => rejeitar(new Error('Tempo esgotado')), ms)
+    ),
+  ]);
+}
+
+async function lerLocal(motoristaId) {
+  const dados = await AsyncStorage.getItem(chaveLocal(motoristaId));
+  return dados ? JSON.parse(dados) : [];
+}
+
+async function gravarLocal(motoristaId, lista) {
+  await AsyncStorage.setItem(chaveLocal(motoristaId), JSON.stringify(lista));
+}
+
+function exigirMotorista() {
+  const motorista = obterMotorista();
+  if (!motorista) {
+    throw new Error('Motorista não identificado. Faça login novamente.');
   }
-  return linha;
+  return motorista;
+}
+
+export function sincronizarPendentes() {
+  const motorista = obterMotorista();
+  if (!motorista) return Promise.resolve();
+  if (sincronizando) return sincronizando;
+
+  sincronizando = (async () => {
+    try {
+      const locais = await lerLocal(motorista.id);
+      const pendentes = locais.filter((v) => !v.sincronizada);
+
+      for (const v of pendentes) {
+        const { error } = await comTimeout(
+          supabase
+            .from('nova_viagem')
+            .upsert(paraBanco(v, motorista.id), { onConflict: 'id_local' })
+        );
+        if (error) throw error;
+
+        const atual = await lerLocal(motorista.id);
+        await gravarLocal(
+          motorista.id,
+          atual.map((x) =>
+            x.id === v.id && x.alteradoEm === v.alteradoEm
+              ? { ...x, sincronizada: true }
+              : x
+          )
+        );
+      }
+    } finally {
+      sincronizando = null;
+    }
+  })();
+
+  return sincronizando;
 }
 
 export async function listarViagens() {
-  const { data, error } = await supabase
-    .from('nova_viagem')
-    .select('*')
-    .order('data_da_viagem', { ascending: false })
-    .order('id', { ascending: false });
+  const motorista = obterMotorista();
+  if (!motorista) return [];
 
-  if (error) throw error;
-  return data.map(doBanco);
+  try {
+    await comTimeout(sincronizarPendentes(), 8000);
+  } catch (e) {
+    console.log('Sincronização pendente:', e.message ?? e);
+  }
+
+  const locais = await lerLocal(motorista.id);
+
+  try {
+    const { data, error } = await comTimeout(
+      supabase
+        .from('nova_viagem')
+        .select('*')
+        .eq('motorista_id', motorista.id)
+    );
+
+    if (error) throw error;
+
+    const pendentes = locais.filter((v) => !v.sincronizada);
+    const idsPendentes = new Set(pendentes.map((v) => v.id));
+
+    const doServidor = data
+      .map(doBanco)
+      .filter((v) => !idsPendentes.has(v.id));
+
+    const resultado = ordenar([...pendentes, ...doServidor]);
+    await gravarLocal(motorista.id, resultado);
+    return resultado;
+  } catch (e) {
+    console.log('Sem conexão, usando dados do aparelho.');
+    return ordenar(locais);
+  }
 }
 
 export async function adicionarViagem(viagem) {
-  const { data, error } = await supabase
-    .from('nova_viagem')
-    .insert(paraBanco(viagem))
-    .select()
-    .single();
+  const motorista = exigirMotorista();
 
-  if (error) throw error;
-  return doBanco(data);
+  const nova = {
+    ...viagem,
+    id: gerarIdLocal(),
+    cancelada: false,
+    sincronizada: false,
+    alteradoEm: Date.now(),
+    criadoEm: Date.now(),
+  };
+
+  const locais = await lerLocal(motorista.id);
+  await gravarLocal(motorista.id, [nova, ...locais]);
+
+  sincronizarPendentes().catch((e) =>
+    console.log('Envio adiado:', e.message ?? e)
+  );
+
+  return nova;
 }
 
 export async function atualizarViagem(viagem) {
-  const { data, error } = await supabase
-    .from('nova_viagem')
-    .update(paraBanco(viagem))
-    .eq('id', viagem.id)
-    .select()
-    .single();
+  const motorista = exigirMotorista();
 
-  if (error) throw error;
-  return doBanco(data);
+  const locais = await lerLocal(motorista.id);
+  const atualizada = {
+    ...viagem,
+    sincronizada: false,
+    alteradoEm: Date.now(),
+  };
+
+  await gravarLocal(
+    motorista.id,
+    locais.map((v) => (v.id === viagem.id ? atualizada : v))
+  );
+
+  sincronizarPendentes().catch((e) =>
+    console.log('Envio adiado:', e.message ?? e)
+  );
+
+  return atualizada;
 }

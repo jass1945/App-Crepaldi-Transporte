@@ -33,6 +33,9 @@ export default function CardViagem({ viagem, onEditar }) {
       </Text>
       {viagem.cancelada && (
         <Text style={styles.avisoCancelado}>CANCELADA</Text>
+      )}  
+      {viagem.sincronizada === false && (
+        <Text style={styles.avisoPendente}>PENDENTE</Text>
       )}
 
       <Text>Placa: {viagem.placa}</Text>
@@ -88,6 +91,16 @@ const styles = StyleSheet.create({
   }, 
   avisoCancelado: {
     color: '#dc2626',
+    fontWeight: 'bold',
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-end',    
+    paddingVertical: 6,
+    paddingHorizontal: 8,    
+    marginTop: -35,      
+  },  
+  avisoPendente: {
+    color: '#d9dc26',
     fontWeight: 'bold',
     flexDirection: 'row',
     alignItems: 'center',

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import {  View,  Text,  TextInput,  TouchableOpacity,  StyleSheet,  Alert,  Image,} from 'react-native';
 
 import { validarLogin } from '../src/data/motoristaLogin';
+import { definirMotorista } from '../src/data/sessao';
 
 export default function LoginScreen({ navigation }) {
   const [cpf, setCpf] = useState('');
@@ -25,7 +26,8 @@ export default function LoginScreen({ navigation }) {
       Alert.alert('Erro', resultado.mensagem);
       return;
     }
-
+    
+    definirMotorista(resultado.motorista);
     navigation.replace('Principal', {
       motorista: resultado.motorista,
     });

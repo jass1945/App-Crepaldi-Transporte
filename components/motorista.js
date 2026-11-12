@@ -1,8 +1,11 @@
 
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { obterMotorista } from '../src/data/sessao';
 
 export default function Motorista() {
+  const motorista = obterMotorista();
+
   return (
     <View style={styles.card}>
 
@@ -12,7 +15,7 @@ export default function Motorista() {
         </Text>
 
         <Text style={styles.nome}>
-          Fulano da Silva
+          {motorista?.nome ?? '-'}
         </Text>
       </View>
 
@@ -23,7 +26,7 @@ export default function Motorista() {
             <Ionicons name="sunny-outline" size={19} color="#E5AC19" />
             <Text style={styles.rotulo}>PERÍODO</Text>
           </View>
-          <Text style={styles.valor}>Diurno</Text>
+          <Text style={styles.valor}>{motorista?.periodo ?? '-'}</Text>
         </View>
 
         <View style={styles.separador} />
@@ -33,7 +36,7 @@ export default function Motorista() {
             <Ionicons name="business-outline" size={19} color="#101653" />
             <Text style={styles.rotulo}>UNIDADE</Text>
           </View>
-          <Text style={styles.valor}>NVZ.</Text>
+          <Text style={styles.valor}>{motorista?.unidade ?? '-'}</Text>
         </View>
 
       </View>
