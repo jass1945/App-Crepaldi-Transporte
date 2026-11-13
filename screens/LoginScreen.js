@@ -1,20 +1,47 @@
 
-import React, { useState } from 'react';
-import {  View,  Text,  TextInput,  TouchableOpacity,  StyleSheet,  Alert,  Image,} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {  View,  Text,  TextInput,  TouchableOpacity,  StyleSheet,  Alert,  Image, Switch} from 'react-native';
 
 import { validarLogin } from '../src/data/motoristaLogin';
-import { definirMotorista } from '../src/data/sessao';
+import { definirMotorista, salvarSessao, carregarSessao } from '../src/data/sessao';
 
 export default function LoginScreen({ navigation }) {
   const [cpf, setCpf] = useState('');
   const [senha, setSenha] = useState('');
+  const [manter, setManter] = useState(true);
+  const [verificando, setVerificando] = useState(true);
+
+  useEffect(()=>{
+    let ativo = true;
+
+    async function restaurar(){
+      try{
+        const salvo = await carregarSessao();
+        if (!ativo) return;
+
+        if (salvo){
+          definirMotorista(salvo);
+          navigation.replace('Principal', {motorista: salvo});
+          return;
+        }        
+      } catch (e){
+        console.log('Erro ao restaurar sessão:', e);
+      }
+
+      if (ativo) setVerificando(false);
+    }
+
+    restaurar();
+    return () => {
+      ativo =false;
+    };
+  }, []);
 
   async function entrar() {
     if (!cpf || !senha) {
       Alert.alert('Atenção', 'Preencha o CPF e a senha.');
       return;
     }
-
     if (senha.length !== 4) {
       Alert.alert('Atenção', 'A senha deve ter 4 dígitos.');
       return;
@@ -28,9 +55,15 @@ export default function LoginScreen({ navigation }) {
     }
     
     definirMotorista(resultado.motorista);
+    if(manter){
+      await salvarSessao(resultado.motorista);
+    }
     navigation.replace('Principal', {
       motorista: resultado.motorista,
     });
+  }
+  if (verificando){
+    return <View style={styles.container}/>;
   }
 
   return (
@@ -53,7 +86,7 @@ export default function LoginScreen({ navigation }) {
         }
         keyboardType="numeric"
         maxLength={11}
-      />
+      />  
 
       <Text style={styles.label}>Senha</Text>
       <TextInput
@@ -68,6 +101,10 @@ export default function LoginScreen({ navigation }) {
         maxLength={4}
         onSubmitEditing={entrar}
       />
+      <View style={styles.linhaManter}>
+        <Switch value={manter} onValueChange={setManter} />
+        <Text style={styles.textoManter}>Manter conectado</Text>
+      </View>        
 
       <TouchableOpacity style={styles.botao} onPress={entrar}>
         <Text style={styles.textoBotao}>ENTRAR</Text>
@@ -137,4 +174,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 24,
   },
+  linhaManter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 20,
+  },
+  textoManter: {
+    color: '#334155',
+    fontSize: 15,
+  },  
 });

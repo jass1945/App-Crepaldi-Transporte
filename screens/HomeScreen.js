@@ -1,8 +1,14 @@
 
 import { View, Text, Button, StyleSheet } from 'react-native';
 import Motorista from '../components/motorista';
+import { encerrarSessao } from '../src/data/sessao';
 
 export default function HomeScreen({ navigation }) {
+  async function sair(){
+    await encerrarSessao();
+    const pai = navigation.getParent() ?? navigation;
+    pai.reset({index: 0, routes: [{name:'Login'}]})
+  }  
   return (
     <View style={styles.container}>
       <Motorista />
@@ -31,6 +37,11 @@ export default function HomeScreen({ navigation }) {
           onPress={() => navigation.navigate('Meu faturamento')}
         />
       </View>
+
+      <View style={styles.botaoSair}>
+        <Button title="Sair" color="#dc2626" onPress={sair} />
+      </View>      
+
     </View>
   );
 }
@@ -44,8 +55,12 @@ const styles = StyleSheet.create({
   botao: {
     marginTop: 20,
     borderRadius: 10,    
-    overflow: 'hidden',
-    
-    
+    overflow: 'hidden',    
+  },
+  botaoSair:{
+    position: 'absolute',
+    top: 75,  
+    right: 40,
+    zIndex: 10,       
   },
 });
