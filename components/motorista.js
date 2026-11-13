@@ -48,7 +48,6 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#FFFFFF',
     marginHorizontal: 2,
-    marginTop: 6,
     marginBottom: 8,
     padding: 15,
     borderRadius: 18,
