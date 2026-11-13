@@ -2,7 +2,7 @@
 import React, { useState, useEffect  } from 'react';
 import {View,Text,TextInput,TouchableOpacity,StyleSheet,ScrollView,Alert, Modal} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { veiculos } from '../src/data/veiculos';
+import { listarVeiculos } from '../src/data/veiculosStorage';
 import { adicionarViagem, atualizarViagem } from '../src/data/viagensStorage';
 
 export default function NvViagenScreen({navigation, route }) {
@@ -15,6 +15,7 @@ export default function NvViagenScreen({navigation, route }) {
   const [modalCancelamento, setModalCancelamento] = useState(false);
   const [hodometroCancelamento, setHodometroCancelamento] = useState('');
   const [motivoCancelamento, setMotivoCancelamento] = useState('');
+  const [veiculos, setVeiculos] = useState([]);
 
   const viagem = route?.params?.viagem;
 
@@ -28,6 +29,21 @@ useEffect(() => {
     setProdutor(viagem.Produtor ?? '');
   }
 }, [viagem]);
+
+// BUSCAR VEÍCULOS NO SUPABASE
+useEffect(() => {
+  async function carregarVeiculos() {
+    try {
+      const lista = await listarVeiculos();
+      setVeiculos(lista);
+    } catch (erro) {
+      console.log('Erro ao buscar veículos:', erro);
+      Alert.alert('Erro', 'Não foi possível carregar os veículos.');
+    }
+  }
+
+  carregarVeiculos();
+}, []);
 
   async function salvarViagem() {
     if (
@@ -44,6 +60,8 @@ useEffect(() => {
       Alert.alert('Atenção','O número do lançamento deve conter exatamente 8 dígitos.');
       return;
     }
+
+    
 
     try {
     const dadosViagem ={

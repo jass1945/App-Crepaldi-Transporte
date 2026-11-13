@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import {  View,  Text,  TextInput,  TouchableOpacity,  StyleSheet,  ScrollView,  Alert,} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { veiculos } from '../src/data/veiculos';
+import { listarVeiculos } from '../src/data/veiculosStorage';
 import {
   adicionarAbastecida,
   buscarUltimaAbastecida,
@@ -23,6 +23,7 @@ export default function NvAbastecidaScreen({ navigation }) {
   
   const [erro, setErro] = useState('');
   const [ultima, setUltima] = useState(null);
+  const [veiculos, setVeiculos] = useState([]);
 
   useEffect(() => {
     if (!placa) {
@@ -34,6 +35,20 @@ export default function NvAbastecidaScreen({ navigation }) {
       .then((u) => setUltima(u))
       .catch(() => setUltima(null));
   }, [placa]);
+
+  useEffect(() => {
+  async function carregarVeiculos() {
+    try {
+      const lista = await listarVeiculos();
+      setVeiculos(lista);
+    } catch (erro) {
+      console.log('Erro ao buscar veículos:', erro);
+      Alert.alert('Erro', 'Não foi possível carregar os veículos.');
+    }
+  }
+
+  carregarVeiculos();
+}, []);
 
   const ehArla = combustivel === 'Arla 32';
 
@@ -105,7 +120,8 @@ export default function NvAbastecidaScreen({ navigation }) {
 
       navigation.goBack();
     } catch (e) {
-      Alert.alert('Erro', 'Não foi possível salvar a abastecida.');
+      console.log('ERRO AO SALVAR ABASTECIDA:', e);
+        Alert.alert('Erro', 'Não foi possível salvar a abastecida. Verifique o console.');
     }
   }
 
