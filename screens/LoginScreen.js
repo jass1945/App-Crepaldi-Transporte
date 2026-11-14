@@ -103,7 +103,7 @@ export default function LoginScreen({ navigation }) {
       />
       <View style={styles.linhaManter}>
         <Switch value={manter} onValueChange={setManter} />
-        <Text style={styles.textoManter}>Manter conectado</Text>
+        <Text style={styles.textoManter}>Lembrar login</Text>
       </View>        
 
       <TouchableOpacity style={styles.botao} onPress={entrar}>
