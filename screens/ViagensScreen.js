@@ -28,6 +28,8 @@ function ultimosMeses(qtd = 3) {
 export default function ViagensScreen({ navigation }) {
   const [viagens, setViagens] = useState([]);
   const [sincronizando, setSincronizando] = useState(false);
+  const meses = ultimosMeses(3);
+  const [indiceMes, setIndiceMes] = useState(0);
 
   async function carregarViagens() {
     try {
@@ -79,6 +81,16 @@ export default function ViagensScreen({ navigation }) {
       />
     );
   }
+  const mesAtivo = meses[indiceMes];
+  const viagensFiltradas = viagens.filter((v) => {
+    const partes = String(v.data ?? '').split('/');
+    if (partes.length !== 3) return false;
+
+    return (
+      Number(partes[1]) - 1 === mesAtivo.mes &&
+      Number(partes[2]) === mesAtivo.ano
+    );
+  });  
 
   return (
     <View style={styles.container}>
@@ -99,6 +111,28 @@ export default function ViagensScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.filtroMeses}>
+        {meses.map((m, index) => (
+          <TouchableOpacity
+            key={`${m.ano}-${m.mes}`}
+            style={[
+              styles.botaoMes,
+              indiceMes === index && styles.botaoMesAtivo,
+            ]}
+            onPress={() => setIndiceMes(index)}
+          >
+            <Text
+              style={[
+                styles.textoMes,
+                indiceMes === index && styles.textoMesAtivo,
+              ]}
+            >
+              {m.rotulo}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>      
+
       <Button
         title="NOVA VIAGEM"
         onPress={() => navigation.navigate('NovaViagem')}
@@ -106,7 +140,7 @@ export default function ViagensScreen({ navigation }) {
       />
 
       <FlatList
-        data={viagens}
+        data={viagensFiltradas}
         keyExtractor={(item) => item.id}
         renderItem={renderizarViagem}
         contentContainerStyle={styles.lista}
@@ -130,8 +164,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    marginTop: 16,
-    marginBottom: 12,
+    marginTop: 5,
+    marginBottom: 8,
   },
   titulo: {
     fontSize: 26,
@@ -154,4 +188,26 @@ const styles = StyleSheet.create({
     marginTop: 16,
     textAlign: 'center',
   },
+  filtroMeses: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  botaoMes: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#e5e7eb',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  botaoMesAtivo: {
+    backgroundColor: '#2563eb',
+  },
+  textoMes: {
+    color: '#334155',
+    fontWeight: 'bold',
+  },
+  textoMesAtivo: {
+    color: '#fff',
+  },  
 });

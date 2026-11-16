@@ -16,7 +16,7 @@ export default function CardViagem({ viagem, onEditar }) {
 
       const tempoDecorrido = Date.now() - viagem.criadoEm;
 
-      setTempoDisponivel(tempoDecorrido < 30000);
+      setTempoDisponivel(tempoDecorrido < 3000000000000);
     }
     verificarTempo();
 
@@ -33,13 +33,14 @@ export default function CardViagem({ viagem, onEditar }) {
       </Text>
       {viagem.cancelada && (
         <Text style={styles.avisoCancelado}>CANCELADA</Text>
-      )}  
-      {viagem.sincronizada === false && (
-        <Text style={styles.avisoPendente}>PENDENTE</Text>
-      )}
+      )}        
 
       <Text>Placa: {viagem.placa}</Text>
       <Text>Data: {viagem.data}</Text>
+      
+      {viagem.sincronizada === false && (
+        <Text style={styles.avisoPendente}><Ionicons name="cloud-upload-outline" size={32} /></Text>
+      )}
       <Text>Valor: R$ {viagem.valor}</Text>
       <Text>Produtor: {viagem.Produtor}</Text>    
 
@@ -100,13 +101,13 @@ const styles = StyleSheet.create({
     marginTop: -35,      
   },  
   avisoPendente: {
-    color: '#d9dc26',
+    color: '#1e3a8a',
     fontWeight: 'bold',
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-end',    
     paddingVertical: 6,
     paddingHorizontal: 8,    
-    marginTop: -30,      
+    marginTop: -45,      
   },
 });
