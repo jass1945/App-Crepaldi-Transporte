@@ -2,7 +2,7 @@
 import React, { useState, useEffect  } from 'react';
 import {View,Text,TextInput,TouchableOpacity,StyleSheet,ScrollView,Alert, Modal} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { listarVeiculos } from '../src/data/veiculosStorage';
+import { listarVeiculosLocais, atualizarVeiculos } from '../src/data/veiculosStorage';
 import { adicionarViagem, atualizarViagem } from '../src/data/viagensStorage';
 
 export default function NvViagenScreen({navigation, route }) {
@@ -30,20 +30,23 @@ useEffect(() => {
   }
 }, [viagem]);
 
-// BUSCAR VEÍCULOS NO SUPABASE
-useEffect(() => {
-  async function carregarVeiculos() {
-    try {
-      const lista = await listarVeiculos();
-      setVeiculos(lista);
-    } catch (erro) {
-      console.log('Erro ao buscar veículos:', erro);
-      Alert.alert('Erro', 'Não foi possível carregar os veículos.');
-    }
-  }
+  useEffect(() => {
+    let ativo = true;
 
-  carregarVeiculos();
-}, []);
+    listarVeiculosLocais().then((lista) => {
+      if (ativo) setVeiculos(lista);
+    });
+
+    atualizarVeiculos()
+      .then((lista) => {
+        if (ativo && lista.length > 0) setVeiculos(lista);
+      })
+      .catch(() => {});
+
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   async function salvarViagem() {
     if (

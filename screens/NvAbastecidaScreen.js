@@ -2,13 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import {  View,  Text,  TextInput,  TouchableOpacity,  StyleSheet,  ScrollView,  Alert,} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { listarVeiculos } from '../src/data/veiculosStorage';
-import {
-  adicionarAbastecida,
-  buscarUltimaAbastecida,
-  paraNumero,
-  formatarMoeda,
-} from '../src/data/abastecidasStorage';
+import { listarVeiculosLocais, atualizarVeiculos } from '../src/data/veiculosStorage';
+import {  adicionarAbastecida,  buscarUltimaAbastecida,  paraNumero,  formatarMoeda,} from '../src/data/abastecidasStorage';
 
 const combustiveis = ['Diesel S10', 'Diesel S500', 'Arla 32'];
 
@@ -24,6 +19,7 @@ export default function NvAbastecidaScreen({ navigation }) {
   const [erro, setErro] = useState('');
   const [ultima, setUltima] = useState(null);
   const [veiculos, setVeiculos] = useState([]);
+  
 
   useEffect(() => {
     if (!placa) {
@@ -37,18 +33,22 @@ export default function NvAbastecidaScreen({ navigation }) {
   }, [placa]);
 
   useEffect(() => {
-  async function carregarVeiculos() {
-    try {
-      const lista = await listarVeiculos();
-      setVeiculos(lista);
-    } catch (erro) {
-      console.log('Erro ao buscar veículos:', erro);
-      Alert.alert('Erro', 'Não foi possível carregar os veículos.');
-    }
-  }
+    let ativo = true;
 
-  carregarVeiculos();
-}, []);
+    listarVeiculosLocais().then((lista) => {
+      if (ativo) setVeiculos(lista);
+    });
+
+    atualizarVeiculos()
+      .then((lista) => {
+        if (ativo && lista.length > 0) setVeiculos(lista);
+      })
+      .catch(() => {});
+
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   const ehArla = combustivel === 'Arla 32';
 

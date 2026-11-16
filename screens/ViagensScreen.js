@@ -7,6 +7,24 @@ import Motorista from '../components/motorista';
 import { listarViagens, sincronizarPendentes } from '../src/data/viagensStorage';
 import CardViagem from '../components/card';
 
+const NOMES_MESES = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+];
+
+function ultimosMeses(qtd = 3) {
+  const hoje = new Date();
+
+  return Array.from({ length: qtd }, (_, i) => {
+    const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+    return {
+      mes: d.getMonth(),
+      ano: d.getFullYear(),
+      rotulo: NOMES_MESES[d.getMonth()],
+    };
+  });
+}
+
 export default function ViagensScreen({ navigation }) {
   const [viagens, setViagens] = useState([]);
   const [sincronizando, setSincronizando] = useState(false);
