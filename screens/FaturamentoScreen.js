@@ -214,18 +214,20 @@ export default function FaturamentoScreen() {
             fromZero
             showValuesOnTopOfBars
             chartConfig={{
-              backgroundColor: '#ffffff',
               backgroundGradientFrom: '#ffffff',
               backgroundGradientTo: '#ffffff',
               decimalPlaces: 2,
-              color: (opacity = 1) =>
-                `rgba(37, 99, 235, ${opacity})`,
-              labelColor: (opacity = 1) =>
-                `rgba(51, 65, 85, ${opacity})`,
-              propsForBackgroundLines: {
-                stroke: '#e2e8f0',
-              },
-              barPercentage: 0.65,
+              color: () => '#334155',
+              labelColor: () => '#334155',
+              fillShadowGradient: '#1d4ed8',
+              fillShadowGradientOpacity: 1,
+              fillShadowGradientFrom: '#4c75e7',
+              fillShadowGradientFromOpacity: 1,
+              fillShadowGradientTo: '#4c75e7',
+              fillShadowGradientToOpacity: 1,
+              barPercentage: 0.6,
+              propsForBackgroundLines: { stroke: '#e2e8f0', strokeDasharray: '' },
+              propsForLabels: { fontSize: 11 },
             }}
             style={styles.grafico}
           />
@@ -255,11 +257,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 15,
-    gap: 25,
+    marginBottom: 8,
+    gap: 20,
   },
   botaoAno: {
-    padding: 10,
+    padding: 1,
   },
   textoBotaoAno: {
     fontSize: 30,
@@ -275,7 +277,7 @@ const styles = StyleSheet.create({
     color: '#cbd5e1',
   },
   listaMeses: {
-    marginBottom: 20,
+    marginBottom: 10,
     maxHeight: 45,
   },
   conteudoMeses: {
@@ -326,7 +328,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e2e8f0',
     borderRadius: 7,
     overflow: 'hidden',
-    marginTop: 16,
+    marginTop: 1,
   },
   barraPreenchida: {
     height: '100%',
