@@ -1,8 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../services/supabase';
 import { obterMotorista } from './sessao';
+import * as FileSystem from 'expo-file-system/legacy';
+import { decode } from 'base64-arraybuffer';
 
 const chaveLocal = (motoristaId) => `@crepaldi:viagens:${motoristaId}`;
+const BUCKET_FOTOS = 'fotos-viagens';
 
 let sincronizando = null;
 
@@ -46,6 +49,7 @@ function doBanco(l) {
     cancelada: l.cancelada,
     hodometroCancelamento: l.hodometro_cancelamento,
     motivoCancelamento: l.motivo_cancelamento,
+    fotoCaminho: l.foto_caminho,
     sincronizada: true,
     criadoEm: new Date(l.created_at).getTime(),
   };
@@ -61,6 +65,7 @@ function paraBanco(v, motoristaId) {
     numero_viagem: String(v.numeroViagem),
     valor_da_viagem: paraNumero(v.valor),
     nome_do_produtor: v.Produtor,
+    foto_caminho: v.fotoCaminho ?? null,
     cancelada: !!v.cancelada,
     hodometro_cancelamento: v.cancelada
       ? paraNumero(v.hodometroCancelamento)
@@ -86,6 +91,38 @@ async function gravarLocal(motoristaId, lista) {
   await AsyncStorage.setItem(chaveLocal(motoristaId), JSON.stringify(lista));
 }
 
+async function guardarFoto(uriOrigem, id) {
+  const destino = `${FileSystem.documentDirectory}viagem-${id}.jpg`;
+  await FileSystem.copyAsync({ from: uriOrigem, to: destino });
+  return destino;
+}
+
+async function enviarFoto(viagem, motoristaId) {
+  const caminho = `${motoristaId}/${viagem.id}.jpg`;
+
+  const base64 = await FileSystem.readAsStringAsync(
+    viagem.fotoUri,
+    {
+      encoding: FileSystem.EncodingType.Base64,
+    }
+  );
+
+  const arquivo = decode(base64);
+
+  const { error } = await supabase.storage
+    .from(BUCKET_FOTOS)
+    .upload(caminho, arquivo, {
+      contentType: 'image/jpeg',
+      upsert: true,
+    });
+
+  if (error) {
+    throw error;
+  }
+
+  return caminho;
+}
+
 function exigirMotorista() {
   const motorista = obterMotorista();
   if (!motorista) {
@@ -105,6 +142,11 @@ export function sincronizarPendentes() {
       const pendentes = locais.filter((v) => !v.sincronizada);
 
       for (const v of pendentes) {
+        let fotoCaminho = v.fotoCaminho;
+
+        if (v.fotoUri && !fotoCaminho) {
+          fotoCaminho = await enviarFoto(v, motorista.id);
+        }        
         const { error } = await comTimeout(
           supabase
             .from('nova_viagem')
@@ -116,9 +158,14 @@ export function sincronizarPendentes() {
         await gravarLocal(
           motorista.id,
           atual.map((x) =>
-            x.id === v.id && x.alteradoEm === v.alteradoEm
-              ? { ...x, sincronizada: true }
+            x.id === v.id
+              ? {
+                  ...x,
+                  fotoCaminho,
+                  sincronizada: x.alteradoEm === v.alteradoEm,
+                }
               : x
+            
           )
         );
       }
@@ -170,10 +217,14 @@ export async function listarViagens() {
 
 export async function adicionarViagem(viagem) {
   const motorista = exigirMotorista();
+  const id = gerarIdLocal();
+
+  const fotoUri = viagem.fotoUri ? await guardarFoto(viagem.fotoUri, id): null;  
 
   const nova = {
     ...viagem,
-    id: gerarIdLocal(),
+    id,
+    fotoUri,
     cancelada: false,
     sincronizada: false,
     alteradoEm: Date.now(),

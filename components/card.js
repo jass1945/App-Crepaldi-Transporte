@@ -16,7 +16,7 @@ export default function CardViagem({ viagem, onEditar }) {
 
       const tempoDecorrido = Date.now() - viagem.criadoEm;
 
-      setTempoDisponivel(tempoDecorrido < 3000000000000);
+      setTempoDisponivel(tempoDecorrido < 3000);
     }
     verificarTempo();
 

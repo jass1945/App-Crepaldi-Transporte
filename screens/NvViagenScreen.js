@@ -4,6 +4,8 @@ import {View,Text,TextInput,TouchableOpacity,StyleSheet,ScrollView,Alert, Modal}
 import { Picker } from '@react-native-picker/picker';
 import { listarVeiculosLocais, atualizarVeiculos } from '../src/data/veiculosStorage';
 import { adicionarViagem, atualizarViagem } from '../src/data/viagensStorage';
+import { Image } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function NvViagenScreen({navigation, route }) {
   const [placa, setPlaca] = useState('');
@@ -16,6 +18,7 @@ export default function NvViagenScreen({navigation, route }) {
   const [hodometroCancelamento, setHodometroCancelamento] = useState('');
   const [motivoCancelamento, setMotivoCancelamento] = useState('');
   const [veiculos, setVeiculos] = useState([]);
+  const [fotoUri, setFotoUri] = useState(null);
 
   const viagem = route?.params?.viagem;
 
@@ -48,6 +51,23 @@ useEffect(() => {
     };
   }, []);
 
+  async function tirarFoto() {
+    const permissao = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permissao.granted) {
+      Alert.alert('Permissão', 'Permita o uso da câmera para registrar a foto.');
+      return;
+    }
+
+    const resultado = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images'],
+      quality: 0.5,
+    });
+
+    if (!resultado.canceled) {
+      setFotoUri(resultado.assets[0].uri);
+    }
+  }  
+
   async function salvarViagem() {
     if (
       !placa.trim() ||
@@ -63,6 +83,10 @@ useEffect(() => {
       Alert.alert('Atenção','O número do lançamento deve conter exatamente 8 dígitos.');
       return;
     }
+    if (!viagem && !fotoUri) {
+      Alert.alert('Atenção', 'Tire a foto da viagem.');
+      return;
+    }    
 
     
 
@@ -74,6 +98,7 @@ useEffect(() => {
       numeroViagem,
       valor,
       Produtor,
+      ...(fotoUri ? { fotoUri } : {}),
     };
     if (viagem) {
       await atualizarViagem({
@@ -184,6 +209,20 @@ useEffect(() => {
           onChangeText={setProdutor}
           autoCapitalize="words"
         />
+        {!viagem && (<>
+            <Text style={styles.label}>Foto da viagem</Text>
+
+            {fotoUri && (
+              <Image source={{ uri: fotoUri }} style={styles.foto} />
+            )}
+
+            <TouchableOpacity style={styles.botaoFoto} onPress={tirarFoto}>
+              <Text style={styles.textoBotaoFoto}>
+                {fotoUri ? 'REFAZER FOTO' : 'TIRAR FOTO'}
+              </Text>
+            </TouchableOpacity>
+          </>
+        )}        
 
         <TouchableOpacity
           style={styles.botao}
@@ -353,6 +392,24 @@ botaoFecharModal: {
 
 textoBotaoFechar: {
   color: '#64748b',
+  fontWeight: 'bold',
+},
+foto: {
+  width: '100%',
+  height: 200,
+  borderRadius: 8,
+  marginBottom: 10,
+},
+botaoFoto: {
+  borderWidth: 1,
+  borderColor: '#2563eb',
+  padding: 14,
+  borderRadius: 8,
+  alignItems: 'center',
+  marginBottom: 18,
+},
+textoBotaoFoto: {
+  color: '#2563eb',
   fontWeight: 'bold',
 },
 });
