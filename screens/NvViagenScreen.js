@@ -7,6 +7,14 @@ import { adicionarViagem, atualizarViagem } from '../src/data/viagensStorage';
 import { Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
+function mascaraData(texto) {
+  const numeros = String(texto).replace(/\D/g, '').slice(0, 8);
+
+  if (numeros.length <= 2) return numeros;
+  if (numeros.length <= 4) return `${numeros.slice(0, 2)}/${numeros.slice(2)}`;
+  return `${numeros.slice(0, 2)}/${numeros.slice(2, 4)}/${numeros.slice(4)}`;
+}
+
 export default function NvViagenScreen({navigation, route }) {
   const [placa, setPlaca] = useState('');
   const [data, setData] = useState(new Date().toLocaleDateString('pt-BR'));
@@ -172,8 +180,9 @@ useEffect(() => {
         <TextInput
           style={styles.input}      
           value={data}
-          onChangeText={setData}
+          onChangeText={(texto) => setData(mascaraData(texto))}
           keyboardType="numeric"
+          maxLength={10}
         />
 
         <Text style={styles.label}>Hodômetro (km)</Text>

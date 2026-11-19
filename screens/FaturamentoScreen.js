@@ -81,7 +81,7 @@ export default function FaturamentoScreen() {
       const placa = viagem.placa || 'Sem placa';
       const valor = converterValor(viagem.valor);
 
-      acumulado[placa] = (acumulado[placa] || 0) + valor;
+      acumulado[placa] = Math.round(((acumulado[placa] || 0) + valor) * 100) / 100;
 
       return acumulado;
     },
@@ -102,7 +102,8 @@ export default function FaturamentoScreen() {
     labels: placas,
     datasets: [
       {
-        data: placas.map((placa) => faturamentoPorPlaca[placa]),
+        data: placas.map((placa) => 
+        Math.round(faturamentoPorPlaca[placa] * 100) / 100)
       },
     ],
   };
