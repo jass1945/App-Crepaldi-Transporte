@@ -150,8 +150,11 @@ export function sincronizarPendentes() {
         const { error } = await comTimeout(
           supabase
             .from('nova_viagem')
-            .upsert(paraBanco(v, motorista.id), { onConflict: 'id_local' })
-        );
+            .upsert(
+              paraBanco({ ...v, fotoCaminho }, motorista.id),
+              { onConflict: 'id_local' }
+            )
+        );        
         if (error) throw error;
 
         const atual = await lerLocal(motorista.id);
